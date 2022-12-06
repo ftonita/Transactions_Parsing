@@ -1,5 +1,6 @@
 from datetime import datetime
-
+from operator import itemgetter
+import operator
 
 FILE = 'operations.json'
 EXECUTED_STATE = 'EXECUTED'
@@ -16,7 +17,10 @@ def getPaymentType(payment: str):
 		return payment_type
 
 def parse(res):
+	count = 0
 	for i in res:
+		if count == 5:
+			return
 		if len(i) > 0 and i['state'] == EXECUTED_STATE:
 
 			datetime_str = i['date'].split('T')[0]
@@ -29,6 +33,7 @@ def parse(res):
 				print(f'{getPaymentType(i["from"])} -> {getPaymentType(i["to"])}')
 			print(cost)
 			print()
+			count += 1
 
 
 try:
@@ -36,7 +41,10 @@ try:
 	with open(FILE, 'r') as fd:
 		res = list(eval(fd.read()))
 		fd.close()
-	parse(res)
+	tmp = [date for date in res if 'date' in date]
+	tmp.sort(key=operator.itemgetter('date'), reverse=True)
+	parse(tmp)
 except Exception as _ex:
 	print(f'Error: {_ex}')
+
 
